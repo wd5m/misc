@@ -11,6 +11,9 @@
 #
 # Change history:
 # 20220901 Initial version
+# 20221101 Modified to add a recursive loop checking for nodes that key
+#          while RPT_TXKEYED is enabled. This catches nodes that transmit while
+#          the SPACE node is talking.
 #
 # A few variables to set
 PGM=`basename $0`
@@ -41,15 +44,21 @@ function processShowvars() {
 # and processes the records.
         local IFS=$'\n'
         set -f;
-        let r=0
-        for line in $(/usr/sbin/asterisk -rx "rpt showvars ${localNode}"); do
-                [ ${DEBUG} -eq 1 ] && log "${line}"
-                if [[ "${line:3:10}" == "RPT_ALINKS" ]]; then
-                        setconnected ${line}
-                elif [[ "${line:3:13}" == "RPT_TXKEYED=0" ]]; then
-                        return;
-                fi
-                let r=${r}+1
+        declare -i ISKEYED=1
+        while [ ${ISKEYED} -eq 1 ]
+        do
+                #let r=0
+                for line in $(/usr/sbin/asterisk -rx "rpt showvars ${localNode}"); do
+                        [ ${DEBUG} -eq 1 ] && log "${line}"
+                        if [[ "${line:3:10}" == "RPT_ALINKS" ]]; then
+                                setconnected ${line}
+                        elif [[ "${line:3:13}" == "RPT_TXKEYED=0" ]]; then
+                                let ISKEYED=0
+                                return
+                        fi
+                        #let r=${r}+1
+                done
+                /bin/sleep 1s
         done
 }
 function setconnected() {
@@ -83,7 +92,7 @@ function setconnected() {
 }
 if [[ ${ENABLED} -eq 1 ]]; then
         log "starting ${localNode}"
-        /bin/sleep 2s   # ignore kerchunk
+        #/bin/sleep 1s  # ignore kerchunk
         processShowvars
 fi
 
