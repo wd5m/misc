@@ -1,0 +1,7 @@
+#!/bin/bash
+# /etc/openvpn/restart-openvpn - 2022-11-30 WD5M
+# simple script to restart openvpn VPN client connection on a Raspberry PI Hamvoip Clearnode
+#
+/usr/bin/pkill -f -9 "/usr/sbin/openvpn"
+/usr/bin/sleep 1
+exec /usr/sbin/openvpn --cd /etc/openvpn --config "client.conf" --script-security 2 --daemon
