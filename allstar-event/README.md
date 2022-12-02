@@ -4,6 +4,12 @@ To minimize potential interference from incoming Allstar connections, I have ena
 
 ```
 [events516221]  ; Event stanza for node 516221 in the rpt.conf file
+MYKEYED1 = v|e|${RPT_ALINKS} =~ "\",[^1][0-9A-Z-]+[TRC]K\""
+/root/mykeyed1.sh 516221 = s|t|MYKEYED1
+```
+The event method above should fire when any node keys, except a private node beginning with the digit `1` which would include node `1100`. The event method below fires when any node keys, including node `1100`. 
+```
+[events516221]  ; Event stanza for node 516221 in the rpt.conf file
 /root/mykeyed1.sh 516221 = s|t|RPT_TXKEYED
 ```
 
